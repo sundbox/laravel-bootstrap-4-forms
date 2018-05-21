@@ -453,8 +453,28 @@ class FormService {
     }
 
     private function _getValue(){
+        $default = null;
+
         $name = $this->_props['name'];
-        $default = isset($this->_Fdata[$name]) ? $this->_Fdata[$name] : null;
+        
+        //Recognize if name refers to an array
+        if (strpos($name, '[') !== false) {
+            //Break the string into keys
+            $keys = preg_split('/(\[\"|\"\]|\[\'|\'\])/',$name,-1, PREG_SPLIT_NO_EMPTY);
+            //Take first 'parent' key in $this->_Fdata in a temp variable
+            $temp = $this->_Fdata;
+            //Loop and Repeat until is not an array
+            foreach($keys as $n)
+            {
+                $temp = isset($temp[$n]) ? $temp[$n] : null;
+                if(!is_array($temp)) {
+                    $default = $temp;
+                    break;
+                }
+            }
+        } else { //Default original line by netojose
+            $default = isset($this->_Fdata[$name]) ? $this->_Fdata[$name] : null;
+        }
         return old($name, $default);
     }
 
